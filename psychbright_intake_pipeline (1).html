@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsychBright Health — GHL Intake Pipeline</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #f4f6f9; color: #1a1a1a; padding: 32px 16px; }
+  .page { max-width: 900px; margin: 0 auto; }
+  .header { background: #1A5276; color: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 28px; }
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 14px; opacity: 0.75; }
+  .card { background: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 16px; font-weight: 700; color: #1A5276; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.04em; }
+  svg { width: 100%; height: auto; display: block; }
+  .node { cursor: pointer; }
+  .node:hover rect, .node:hover circle { opacity: 0.85; }
+  .tooltip { position: fixed; background: #1a1a1a; color: white; padding: 10px 14px; border-radius: 8px; font-size: 13px; max-width: 260px; line-height: 1.5; pointer-events: none; z-index: 100; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; font-size: 13px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .footer { text-align: center; font-size: 12px; color: #888; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>PsychBright Health — GHL New Patient Intake Pipeline</h1>
+    <p>Interactive workflow reference &nbsp;|&nbsp; Hover over any stage for details</p>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- PIPELINE FLOW DIAGRAM -->
+  <div class="card">
+    <h2>Pipeline Flow</h2>
+    <svg viewBox="0 0 860 720" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#B7770D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#1E8449" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#A93226" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Sources -->
+      <g class="node" data-tip="Website contact form submissions are captured by GHL and create a new opportunity in the PB NEW pipeline at the Inquiry stage.">
+        <rect x="60" y="30" width="200" height="46" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="160" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Website form</text>
+      </g>
+      <g class="node" data-tip="Psychology Today referrals are captured by GHL and create a new opportunity in the PB NEW pipeline at the Inquiry stage.">
+        <rect x="300" y="30" width="220" height="46" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="410" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Psychology Today</text>
+      </g>
+
+      <!-- Source → Stage 1 arrows -->
+      <path d="M160 76 L160 104 L270 104 L270 124" fill="none" stroke="#aaa" stroke-width="1" marker-end="url(#arr)"/>
+      <path d="M410 76 L410 104 L270 104 L270 124" fill="none" stroke="#aaa" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- Stage 1: Inquiry -->
+      <g class="node" data-tip="INQUIRY: Created automatically when a form submission comes in. No owner assigned. The record moves forward immediately via automation — no VA action needed here.">
+        <rect x="130" y="124" width="280" height="58" rx="8" fill="#D1F2EB" stroke="#1D9E75" stroke-width="1.5"/>
+        <text x="270" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#0B5345">1. Inquiry</text>
+        <text x="270" y="168" text-anchor="middle" font-size="12" fill="#0E6655">Auto-created — no owner yet</text>
+      </g>
+      <rect x="540" y="136" width="280" height="34" rx="6" fill="#F0FBF7" stroke="#A9DFBF" stroke-width="0.75"/>
+      <text x="680" y="157" text-anchor="middle" font-size="11" fill="#1E8449">Auto: opportunity created in GHL</text>
+
+      <!-- Arrow 1 → 2 -->
+      <line x1="270" y1="182" x2="270" y2="210" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+      <text x="282" y="200" font-size="11" fill="#888">immediately</text>
+
+      <!-- Stage 2: Form 1 Sent -->
+      <g class="node" data-tip="FORM 1 SENT — PENDING: GHL automatically sends Form 1 to the patient via their preferred contact method (email or text). Date Form 1 Sent is stamped on the record. No owner assigned yet — the 48-hour clock starts now.">
+        <rect x="130" y="210" width="280" height="58" rx="8" fill="#D1F2EB" stroke="#1D9E75" stroke-width="1.5"/>
+        <text x="270" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="#0B5345">2. Form 1 sent — pending</text>
+        <text x="270" y="252" text-anchor="middle" font-size="12" fill="#0E6655">No owner — awaiting response</text>
+      </g>
+      <rect x="540" y="218" width="280" height="44" rx="6" fill="#F0FBF7" stroke="#A9DFBF" stroke-width="0.75"/>
+      <text x="680" y="236" text-anchor="middle" font-size="11" fill="#1E8449">Auto: Form 1 sent via preferred</text>
+      <text x="680" y="252" text-anchor="middle" font-size="11" fill="#1E8449">contact method + date stamped</text>
+
+      <!-- Two paths from Stage 2 -->
+      <path d="M190 268 L190 308 L150 308 L150 338" fill="none" stroke="#aaa" stroke-width="1" marker-end="url(#arr)"/>
+      <text x="120" y="304" font-size="11" fill="#555" text-anchor="middle">Responds</text>
+      <path d="M350 268 L350 308 L400 308 L400 338" fill="none" stroke="#B7770D" stroke-width="1" marker-end="url(#arr-amber)"/>
+      <text x="420" y="304" font-size="11" fill="#B7770D">No reply 48h</text>
+
+      <!-- Stage 3a: Intake Form Submitted (direct) -->
+      <g class="node" data-tip="INTAKE FORM SUBMITTED (direct): The patient responded to Form 1 on their own. Date Form 1 Received is stamped. The record arrives here unassigned — a VA must check this view daily and manually claim ownership to begin scheduling.">
+        <rect x="40" y="338" width="220" height="58" rx="8" fill="#D1F2EB" stroke="#1D9E75" stroke-width="1.5"/>
+        <text x="150" y="358" text-anchor="middle" font-size="13" font-weight="700" fill="#0B5345">4. Intake form submitted</text>
+        <text x="150" y="376" text-anchor="middle" font-size="11" fill="#0E6655">Direct — no VA involvement</text>
+      </g>
+
+      <!-- Stage 3b: Follow Up Required -->
+      <g class="node" data-tip="FOLLOW UP REQUIRED: 48-hour escalation fired. GHL moves the record here automatically and sends an internal alert. A VA must open this filtered view daily, manually claim ownership, and begin phone outreach. Call Attempt Count is incremented each time.">
+        <rect x="300" y="338" width="240" height="58" rx="8" fill="#FEF3CD" stroke="#B7770D" stroke-width="1.5"/>
+        <text x="420" y="358" text-anchor="middle" font-size="13" font-weight="700" fill="#7D6608">3. Follow up required</text>
+        <text x="420" y="376" text-anchor="middle" font-size="11" fill="#9A7D0A">VA claims ownership + calls</text>
+      </g>
+      <rect x="570" y="348" width="250" height="34" rx="6" fill="#FFFDE7" stroke="#F9CA74" stroke-width="0.75"/>
+      <text x="695" y="366" text-anchor="middle" font-size="11" fill="#B7770D">Auto: 48h trigger + internal alert</text>
+
+      <!-- Follow Up → Intake Form Submitted consolidated -->
+      <path d="M420 396 L420 430 L270 430 L270 460" fill="none" stroke="#aaa" stroke-width="1" marker-end="url(#arr)"/>
+      <text x="355" y="426" font-size="11" fill="#555">form collected</text>
+      <path d="M150 396 L150 430 L270 430 L270 460" fill="none" stroke="#aaa" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- Stage 4: Intake Form Submitted (consolidated) -->
+      <g class="node" data-tip="INTAKE FORM SUBMITTED: Central working stage. If coming from Follow Up Required, VA is already assigned. If arriving directly, VA must claim ownership. VA schedules appointment from here. Call Attempt Count tracked throughout.">
+        <rect x="130" y="460" width="280" height="58" rx="8" fill="#D1F2EB" stroke="#1D9E75" stroke-width="1.5"/>
+        <text x="270" y="482" text-anchor="middle" font-size="14" font-weight="700" fill="#0B5345">4. Intake form submitted</text>
+        <text x="270" y="502" text-anchor="middle" font-size="12" fill="#0E6655">VA owns record — schedules appt</text>
+      </g>
+      <rect x="540" y="468" width="280" height="44" rx="6" fill="#F0FBF7" stroke="#A9DFBF" stroke-width="0.75"/>
+      <text x="680" y="486" text-anchor="middle" font-size="11" fill="#1E8449">VA claims if unassigned</text>
+      <text x="680" y="502" text-anchor="middle" font-size="11" fill="#1E8449">Call attempt count tracked</text>
+
+      <!-- Branch to Won / Lost -->
+      <line x1="270" y1="518" x2="270" y2="548" stroke="#aaa" stroke-width="1"/>
+      <line x1="150" y1="548" x2="390" y2="548" stroke="#aaa" stroke-width="1"/>
+      <line x1="150" y1="548" x2="150" y2="568" stroke="#1E8449" stroke-width="1" marker-end="url(#arr-green)"/>
+      <line x1="390" y1="548" x2="390" y2="568" stroke="#A93226" stroke-width="1" marker-end="url(#arr-red)"/>
+      <text x="100" y="544" font-size="11" fill="#1E8449">confirmed</text>
+      <text x="400" y="544" font-size="11" fill="#A93226">declined</text>
+
+      <!-- Stage 5a: Won -->
+      <g class="node" data-tip="WON: VA manually closes when the appointment is confirmed. Must populate: Patient ID, Appointment Date, and confirm Provider ID is correct before closing.">
+        <rect x="40" y="568" width="220" height="58" rx="8" fill="#D5F5E3" stroke="#1E8449" stroke-width="1.5"/>
+        <text x="150" y="591" text-anchor="middle" font-size="14" font-weight="700" fill="#145A32">5. Won</text>
+        <text x="150" y="611" text-anchor="middle" font-size="12" fill="#1E8449">Appointment confirmed</text>
+      </g>
+      <text x="40" y="644" font-size="11" fill="#555">Populate: Patient ID,</text>
+      <text x="40" y="658" font-size="11" fill="#555">Appt Date, Provider ID</text>
+
+      <!-- Stage 5b: Lost -->
+      <g class="node" data-tip="LOST: VA manually closes with Loss Reason required. Options: No response / Declined — cost / Declined — availability / Declined — other / Wrong number or unreachable / Patient never scheduled 1st appointment.">
+        <rect x="290" y="568" width="220" height="58" rx="8" fill="#FDEDEC" stroke="#A93226" stroke-width="1.5"/>
+        <text x="400" y="591" text-anchor="middle" font-size="14" font-weight="700" fill="#78281F">6. Lost</text>
+        <text x="400" y="611" text-anchor="middle" font-size="12" fill="#A93226">Loss reason required</text>
+      </g>
+      <text x="290" y="644" font-size="11" fill="#555">No response / Declined /</text>
+      <text x="290" y="658" font-size="11" fill="#555">Wrong number / Never scheduled</text>
+    </svg>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#D1F2EB;border:1.5px solid #1D9E75"></div> Auto-triggered stage</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FEF3CD;border:1.5px solid #B7770D"></div> VA action required</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#D5F5E3;border:1.5px solid #1E8449"></div> Won</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FDEDEC;border:1.5px solid #A93226"></div> Lost</div>
+    </div>
+  </div>
+
+  <!-- CUSTOM FIELDS & OWNERSHIP -->
+  <div class="card">
+    <h2>Custom Fields &amp; VA Ownership</h2>
+    <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Section label -->
+      <text x="0" y="22" font-size="13" font-weight="700" fill="#1A5276">Custom fields to add in GHL</text>
+
+      <!-- Field cards row 1 -->
+      <g class="node" data-tip="Date Form 1 Sent: Auto-populated by the GHL workflow the moment Form 1 is triggered and sent to the patient. No manual entry needed.">
+        <rect x="0" y="34" width="196" height="54" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="98" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Date Form 1 sent</text>
+        <text x="98" y="76" text-anchor="middle" font-size="11" fill="#2874A6">Auto — on Form 1 trigger</text>
+      </g>
+      <g class="node" data-tip="Date Form 1 Received: Auto-populated by GHL when the patient submits the completed Form 1. Allows you to measure response time and track how long records sat in pending.">
+        <rect x="220" y="34" width="196" height="54" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="318" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Date Form 1 received</text>
+        <text x="318" y="76" text-anchor="middle" font-size="11" fill="#2874A6">Auto — on form submission</text>
+      </g>
+      <g class="node" data-tip="Call Attempt Count: Manually incremented by the VA each time they make an outreach call or contact attempt. Gives management visibility into how much effort has been spent on each record.">
+        <rect x="440" y="34" width="196" height="54" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="538" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Call attempt count</text>
+        <text x="538" y="76" text-anchor="middle" font-size="11" fill="#2874A6">Manual — VA increments</text>
+      </g>
+      <g class="node" data-tip="Patient ID: The unique identifier assigned in your scheduling/EHR system. VA enters this manually when closing to Won. Links the GHL record to the patient's clinical record.">
+        <rect x="660" y="34" width="196" height="54" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="758" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Patient ID</text>
+        <text x="758" y="76" text-anchor="middle" font-size="11" fill="#2874A6">Manual — at Won close</text>
+      </g>
+
+      <!-- Field cards row 2 -->
+      <g class="node" data-tip="Loss Reason: Required dropdown field that must be populated before a VA can close a record to Lost. Options: No response / Declined — cost / Declined — availability / Declined — other / Wrong number or unreachable / Patient never scheduled 1st appointment.">
+        <rect x="0" y="108" width="196" height="54" rx="8" fill="#EBF5FB" stroke="#2E86C1" stroke-width="1"/>
+        <text x="98" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#1A5276">Loss reason</text>
+        <text x="98" y="150" text-anchor="middle" font-size="11" fill="#2874A6">Required — Lost close only</text>
+      </g>
+      <g class="node" data-tip="Appointment Date: Already exists in your GHL setup. Populated by the VA at Won close with the confirmed appointment date and time.">
+        <rect x="220" y="108" width="196" height="54" rx="8" fill="#F4F6F7" stroke="#AAB7B8" stroke-width="1"/>
+        <text x="318" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#555">Appointment date</text>
+        <text x="318" y="150" text-anchor="middle" font-size="11" fill="#777">Existing — no change</text>
+      </g>
+      <g class="node" data-tip="Owner: Already exists in GHL. Safe to use for VA assignment — confirmed it does not interfere with your appointment reminder automation, which runs off Provider ID independently.">
+        <rect x="440" y="108" width="196" height="54" rx="8" fill="#F4F6F7" stroke="#AAB7B8" stroke-width="1"/>
+        <text x="538" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#555">Owner</text>
+        <text x="538" y="150" text-anchor="middle" font-size="11" fill="#777">Existing — no change</text>
+      </g>
+      <g class="node" data-tip="Provider ID: Already exists in GHL and is used by the appointment reminder automation. Not to be confused with VA ownership. Set when a provider is assigned to a patient.">
+        <rect x="660" y="108" width="196" height="54" rx="8" fill="#F4F6F7" stroke="#AAB7B8" stroke-width="1"/>
+        <text x="758" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#555">Provider ID</text>
+        <text x="758" y="150" text-anchor="middle" font-size="11" fill="#777">Existing — no change</text>
+      </g>
+
+      <!-- VA Ownership section -->
+      <line x1="0" y1="182" x2="856" y2="182" stroke="#E5E8E8" stroke-width="1"/>
+      <text x="0" y="204" font-size="13" font-weight="700" fill="#1A5276">VA ownership — daily filtered views to monitor</text>
+
+      <g class="node" data-tip="Follow Up Required — Unassigned: VAs check this filtered view daily. Any record here has been waiting 48+ hours without a Form 1 submission. VA claims ownership and begins phone outreach immediately. Call Attempt Count is incremented each call.">
+        <rect x="0" y="216" width="410" height="64" rx="8" fill="#FEF3CD" stroke="#B7770D" stroke-width="1.5"/>
+        <text x="205" y="242" text-anchor="middle" font-size="13" font-weight="700" fill="#7D6608">Follow up required — unassigned</text>
+        <text x="205" y="262" text-anchor="middle" font-size="12" fill="#9A7D0A">VA claims ownership and begins phone outreach</text>
+      </g>
+
+      <g class="node" data-tip="Intake Form Submitted — Unassigned: VAs check this filtered view daily. Records here are patients who completed Form 1 on their own without VA follow-up — they're motivated and ready to schedule. VA claims ownership and initiates scheduling immediately.">
+        <rect x="440" y="216" width="416" height="64" rx="8" fill="#FEF3CD" stroke="#B7770D" stroke-width="1.5"/>
+        <text x="648" y="242" text-anchor="middle" font-size="13" font-weight="700" fill="#7D6608">Intake form submitted — unassigned</text>
+        <text x="648" y="262" text-anchor="middle" font-size="12" fill="#9A7D0A">VA claims ownership and initiates scheduling</text>
+      </g>
+
+      <!-- Priority build -->
+      <line x1="0" y1="300" x2="856" y2="300" stroke="#E5E8E8" stroke-width="1"/>
+      <g class="node" data-tip="PRIORITY BUILD — 48-Hour Escalation: When a record has been in Form 1 Sent — Pending for 48 hours with no submission, GHL automatically moves it to Follow Up Required and fires an internal notification to the VA team. David should build and test this before any other pipeline changes go live.">
+        <rect x="0" y="312" width="856" height="52" rx="8" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1.5"/>
+        <text x="428" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#4A235A">Priority build: 48-hour escalation automation</text>
+        <text x="428" y="352" text-anchor="middle" font-size="12" fill="#6C3483">Form 1 Sent — Pending with no submission after 48h  →  auto-move to Follow Up Required + internal alert</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="footer">PsychBright Health &nbsp;|&nbsp; GHL Intake Pipeline &nbsp;|&nbsp; Confidential</div>
+</div>
+
+<script>
+  const tooltip = document.getElementById('tooltip');
+  document.querySelectorAll('.node').forEach(node => {
+    node.addEventListener('mouseenter', e => {
+      const tip = node.getAttribute('data-tip');
+      if (!tip) return;
+      tooltip.textContent = tip;
+      tooltip.style.display = 'block';
+    });
+    node.addEventListener('mousemove', e => {
+      let x = e.clientX + 14, y = e.clientY + 14;
+      if (x + 270 > window.innerWidth) x = e.clientX - 280;
+      if (y + 100 > window.innerHeight) y = e.clientY - 100;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+    node.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+  });
+</script>
+</body>
+</html>
