@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsychBright Health — GHL Intake Pipeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a9d8f;
+    --amber: #e9a71a;
+    --red: #e05c5c;
+    --green: #4caf82;
+    --purple: #6366f1;
+    --slate: #4a5568;
+    --slate-light: #718096;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #e2e8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  .page-header { text-align: center; margin-bottom: 40px; }
+
+  .logo-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-bottom: 6px;
+  }
+
+  .brand { font-size: 22px; font-weight: 600; color: var(--navy); }
+  .brand span { color: var(--amber); }
+
+  .page-title {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--slate-light); margin-top: 4px;
+  }
+
+  .legend {
+    display: flex; gap: 20px; justify-content: center;
+    margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--slate); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 32px;
+    max-width: 1220px;
+    margin: 0 auto;
+  }
+
+  /* Pipeline section */
+  .pipeline-section h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--slate-light); margin-bottom: 20px;
+  }
+
+  .sources { display: flex; gap: 16px; justify-content: center; margin-bottom: 0; }
+
+  .source-box {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 10px 24px; font-size: 13px;
+    font-weight: 500; color: var(--slate); min-width: 140px; text-align: center;
+  }
+
+  /* Connectors */
+  .arrow-down {
+    width: 0; height: 0;
+    border-left: 6px solid transparent; border-right: 6px solid transparent;
+    border-top: 8px solid var(--border); margin: 0 auto;
+  }
+
+  .label-inline {
+    font-size: 11px; color: var(--slate-light); font-weight: 500;
+    letter-spacing: 0.04em; background: var(--bg); padding: 2px 10px;
+    border-radius: 20px; margin: 3px auto; display: block; width: fit-content;
+  }
+
+  .vline {
+    width: 2px; background: var(--border); min-height: 16px; margin: 0 auto;
+  }
+
+  /* Stage cards */
+  .stage {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 16px 20px; position: relative;
+    transition: box-shadow 0.2s; cursor: default;
+  }
+  .stage:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+  .stage-number {
+    font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+    color: var(--slate-light); letter-spacing: 0.08em; margin-bottom: 3px;
+  }
+  .stage-title { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .stage-sub { font-size: 12px; color: var(--slate-light); }
+
+  .stage-action {
+    margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border);
+    font-size: 11.5px; color: var(--slate); display: flex;
+    align-items: flex-start; gap: 8px;
+  }
+  .stage-action + .stage-action { margin-top: 5px; padding-top: 5px; }
+
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    margin-top: 3px; flex-shrink: 0;
+  }
+  .dot-auto { background: var(--teal); }
+  .dot-va   { background: var(--amber); }
+  .dot-new  { background: var(--purple); }
+  .dot-green { background: var(--green); }
+  .dot-red  { background: var(--red); }
+
+  .stage.s-teal   { border-color: var(--teal); }
+  .stage.s-amber  { border-color: var(--amber); background: #fffdf0; }
+  .stage.s-purple { border-color: var(--purple); background: #f5f5ff; }
+  .stage.s-green  { border-color: var(--green); background: #f0fdf6; }
+  .stage.s-red    { border-color: var(--red); background: #fff5f5; }
+
+  .stage-title.green { color: var(--green); }
+  .stage-title.red   { color: var(--red); }
+
+  .new-badge {
+    display: inline-flex; align-items: center;
+    background: var(--purple); color: white; font-size: 9px;
+    font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* Branch */
+  .branch-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .branch-label {
+    font-size: 11px; font-weight: 500; text-align: center; margin-bottom: 5px;
+  }
+  .branch-label.green { color: var(--green); }
+  .branch-label.amber { color: var(--amber); }
+
+  .end-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Re-engagement note */
+  .reengagement-note {
+    margin-top: 10px; padding: 8px 12px; background: #f0eeff;
+    border-radius: 8px; font-size: 11px; color: var(--purple);
+    font-weight: 500; display: flex; align-items: flex-start; gap: 6px;
+  }
+
+  /* Insurance warning box */
+  .warn-box {
+    margin-top: 9px; padding: 8px 12px; background: #fff8e1;
+    border-radius: 8px; font-size: 11px; color: #92650a;
+    font-weight: 500; display: flex; align-items: flex-start; gap: 6px;
+    border: 1px solid #f5c848;
+  }
+
+  /* Checklist items */
+  .checklist { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+  .check-item {
+    font-size: 11.5px; color: var(--slate); display: flex;
+    align-items: flex-start; gap: 6px; padding-left: 4px;
+  }
+  .check-item::before { content: '☐'; font-size: 12px; margin-top: -1px; flex-shrink: 0; }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  .card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--slate-light); margin-bottom: 14px;
+  }
+
+  .field-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 7px 0; border-bottom: 1px solid var(--border); gap: 8px;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-name { font-size: 12.5px; font-weight: 500; color: var(--navy); }
+  .field-type { font-size: 11px; color: var(--slate-light); text-align: right; font-family: 'DM Mono', monospace; }
+  .field-new { font-size: 10px; background: var(--purple); color: white; padding: 1px 6px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
+
+  .view-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .view-row:last-child { border-bottom: none; }
+  .view-title { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .view-desc { font-size: 11.5px; color: var(--slate-light); }
+
+  .automation-card {
+    border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 10px; border: 1.5px solid;
+  }
+  .automation-card:last-child { margin-bottom: 0; }
+  .automation-card.teal   { border-color: var(--teal); background: #f0fdfb; }
+  .automation-card.amber  { border-color: var(--amber); background: #fffdf0; }
+  .automation-card.purple { border-color: var(--purple); background: #f5f5ff; }
+
+  .auto-trigger {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .auto-trigger.teal   { color: var(--teal); }
+  .auto-trigger.amber  { color: var(--amber); }
+  .auto-trigger.purple { color: var(--purple); }
+
+  .auto-desc { font-size: 12px; color: var(--slate); line-height: 1.5; }
+
+  .sms-box {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 11.5px; color: var(--slate);
+    line-height: 1.6; font-style: italic; margin-top: 6px;
+  }
+
+  .footer {
+    text-align: center; margin-top: 40px; font-size: 11px;
+    color: var(--slate-light); letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo-row">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="22" r="13" stroke="#1a2744" stroke-width="2"/>
+      <path d="M14 22c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#1a2744" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="9" x2="20" y2="5" stroke="#e9a71a" stroke-width="2" stroke-linecap="round"/>
+      <line x1="13" y1="11" x2="10" y2="8" stroke="#e9a71a" stroke-width="2" stroke-linecap="round"/>
+      <line x1="27" y1="11" x2="30" y2="8" stroke="#e9a71a" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="35" x2="20" y2="38" stroke="#1a2744" stroke-width="2" stroke-linecap="round"/>
+      <line x1="16" y1="38" x2="24" y2="38" stroke="#1a2744" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="brand">Psych<span>Bright</span> Health</div>
+  </div>
+  <div class="page-title">GHL New Patient Intake Pipeline — Final</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div> Auto action</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> VA action required</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> New</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Won</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Lost</div>
+</div>
+
+<div class="layout">
+
+  <!-- PIPELINE -->
+  <div class="pipeline-section">
+    <h2>Pipeline Flow</h2>
+
+    <!-- Sources -->
+    <div class="sources">
+      <div class="source-box">Website Form</div>
+      <div class="source-box">Psychology Today</div>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin:4px 0;">
+      <svg width="300" height="28" viewBox="0 0 300 28">
+        <line x1="75" y1="0" x2="150" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="225" y1="0" x2="150" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <!-- STAGE 1 -->
+    <div class="stage s-teal">
+      <div class="stage-number">STAGE 01</div>
+      <div class="stage-title">Inquiry</div>
+      <div class="stage-sub">Auto-created — no owner yet</div>
+      <div class="stage-action">
+        <div class="dot dot-auto"></div>
+        <div>Auto: opportunity + contact created in GHL immediately. Demographic intake form sent via preferred contact method + date stamped.</div>
+      </div>
+    </div>
+
+    <div class="vline"></div>
+    <div class="label-inline">immediately</div>
+    <div class="vline"></div>
+    <div class="arrow-down"></div>
+    <div style="height:6px"></div>
+
+    <!-- STAGE 2 -->
+    <div class="stage s-teal">
+      <div class="stage-number">STAGE 02</div>
+      <div class="stage-title">Form Sent — Pending</div>
+      <div class="stage-sub">No owner — awaiting form submission</div>
+      <div class="stage-action">
+        <div class="dot dot-new"></div>
+        <div><strong>NEW</strong> — Auto: 24h patient reminder SMS if no submission <span class="new-badge">New</span></div>
+      </div>
+      <div class="stage-action">
+        <div class="dot dot-auto"></div>
+        <div>Auto: 48h trigger → moves to Stage 03 + internal VA alert if still no response</div>
+      </div>
+    </div>
+
+    <!-- Branch split -->
+    <div style="display:flex;justify-content:center;margin:4px 0;">
+      <svg width="300" height="28" viewBox="0 0 300 28">
+        <line x1="150" y1="0" x2="75" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="150" y1="0" x2="225" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="branch-row" style="margin-bottom:8px;">
+      <div>
+        <div class="branch-label green">Responds</div>
+        <div class="stage s-teal" style="height:100%;">
+          <div class="stage-number">STAGE 03A</div>
+          <div class="stage-title">Intake Form Submitted</div>
+          <div class="stage-sub">Direct — no VA involvement</div>
+          <div class="stage-action">
+            <div class="dot dot-va"></div>
+            <div>VA claims if unassigned</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="branch-label amber">No reply 48h</div>
+        <div class="stage s-amber">
+          <div class="stage-number">STAGE 03B</div>
+          <div class="stage-title">Follow Up Required</div>
+          <div class="stage-sub">VA claims ownership + calls</div>
+          <div class="stage-action">
+            <div class="dot dot-va"></div>
+            <div>VA calls — call attempt count tracked. Collects form if reached.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Merge back -->
+    <div style="display:flex;justify-content:center;margin:2px 0;">
+      <svg width="300" height="28" viewBox="0 0 300 28">
+        <line x1="75" y1="0" x2="150" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+        <line x1="225" y1="0" x2="150" y2="28" stroke="#e2e8f0" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="arrow-down"></div>
+    <div style="height:6px"></div>
+
+    <!-- STAGE 4 — NEW -->
+    <div class="stage s-purple">
+      <div class="stage-number">STAGE 04 <span class="new-badge">New</span></div>
+      <div class="stage-title">Insurance Received — Pending Verification</div>
+      <div class="stage-sub">VA owns — must confirm insurance before hold</div>
+      <div class="stage-action">
+        <div class="dot dot-va"></div>
+        <div>VA confirms insurance card received (via form, text, email, or Valant). Updates <strong>Insurance Received</strong> custom field = Yes.</div>
+      </div>
+      <div class="stage-action">
+        <div class="dot dot-va"></div>
+        <div>VA sends insurance info to B&amp;E team via WhatsApp. B&amp;E logs full benefits breakdown into Valant patient chart (up to 24h).</div>
+      </div>
+      <div class="warn-box">
+        <span>⚠</span>
+        <div>No calendar hold may be placed until Insurance Received = Yes. This is a hard gate.</div>
+      </div>
+      <div class="stage-action" style="margin-top:9px;padding-top:9px;">
+        <div class="dot dot-new"></div>
+        <div><strong>NEW</strong> — Auto: 24h internal task fires if Insurance Received still = No <span class="new-badge">New</span></div>
+      </div>
+    </div>
+
+    <div class="vline"></div>
+    <div class="label-inline">insurance confirmed</div>
+    <div class="vline"></div>
+    <div class="arrow-down"></div>
+    <div style="height:6px"></div>
+
+    <!-- STAGE 5 — NEW -->
+    <div class="stage s-purple">
+      <div class="stage-number">STAGE 05 <span class="new-badge">New</span></div>
+      <div class="stage-title">Hold Placed — Pending Patient Completion</div>
+      <div class="stage-sub">VA owns — all 3 items sent simultaneously with hold</div>
+      <div class="stage-action">
+        <div class="dot dot-va"></div>
+        <div>VA places calendar hold on clinician's calendar and sends all 3 items to patient simultaneously:</div>
+      </div>
+      <div class="checklist">
+        <div class="check-item">Patient portal registration link</div>
+        <div class="check-item">Consent forms</div>
+        <div class="check-item">Credit card entry</div>
+      </div>
+      <div class="stage-action">
+        <div class="dot dot-va"></div>
+        <div>VA assists patient manually with CC entry or portal registration if patient gets confused.</div>
+      </div>
+      <div class="stage-action">
+        <div class="dot dot-va"></div>
+        <div>VA monitors WhatsApp for B&amp;E confirmation. Once received, marks <strong>B&amp;E Confirmed</strong> = Yes in GHL.</div>
+      </div>
+    </div>
+
+    <div class="vline"></div>
+    <div class="label-inline">all 3 complete + B&E confirmed</div>
+    <div class="vline"></div>
+    <div class="arrow-down"></div>
+    <div style="height:6px"></div>
+
+    <!-- Won / Lost -->
+    <div class="end-row">
+      <div class="stage s-green">
+        <div class="stage-number">STAGE 06</div>
+        <div class="stage-title green">Won — Appointment Confirmed</div>
+        <div class="stage-sub">All gates cleared</div>
+        <div class="stage-action">
+          <div class="dot dot-green"></div>
+          <div>Hold converted to official patient encounter in Valant. Populate: Patient ID, Appt Date, Provider ID.</div>
+        </div>
+      </div>
+      <div class="stage s-red">
+        <div class="stage-number">STAGE 07</div>
+        <div class="stage-title red">Lost</div>
+        <div class="stage-sub">Loss reason required</div>
+        <div class="stage-action">
+          <div class="dot dot-red"></div>
+          <div>
+            <strong>Unreachable:</strong> Bad contact info / Never responded<br>
+            <strong>Declined:</strong> Insurance not accepted / No availability / Found another provider / Not ready<br>
+            <strong>Not a Fit:</strong> Under 18 / Outside of scope / Telehealth not an option<br>
+            <strong>Misdirected:</strong> Existing patient / Wrong number or spam
+          </div>
+        </div>
+        <div class="reengagement-note">
+          <span>↺</span>
+          <div><strong>NEW:</strong> Lost reason = "Unreachable — Never responded" only → 30-day re-engagement SMS + email from original inquiry date. All other loss reasons excluded.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Automations -->
+    <div class="card">
+      <h3>Automations</h3>
+
+      <div class="automation-card teal">
+        <div class="auto-trigger teal">Immediate — Stage 1</div>
+        <div class="auto-desc">Opportunity + contact created. Demographic intake form sent via preferred contact method. Date stamped.</div>
+      </div>
+
+      <div class="automation-card purple">
+        <div class="auto-trigger purple">24 Hours — Stage 2 <span class="new-badge">New</span></div>
+        <div class="auto-desc">Patient reminder SMS if no form submission:</div>
+        <div class="sms-box">"Hi [First Name], thanks for reaching out to PsychBright Health! We received your submission and want to make sure we get you scheduled. Complete your intake form here: [link]. Any questions, give us a call or text us back at [#]."</div>
+      </div>
+
+      <div class="automation-card amber">
+        <div class="auto-trigger amber">48 Hours — Stage 2 → 3B</div>
+        <div class="auto-desc">No submission after 48h → auto-move to Follow Up Required + internal alert to VA.</div>
+      </div>
+
+      <div class="automation-card purple">
+        <div class="auto-trigger purple">24 Hours — Stage 4 <span class="new-badge">New</span></div>
+        <div class="auto-desc">If Insurance Received = No after 24h in Stage 4 → internal task fires reminding VA to follow up and collect insurance before placing any hold.</div>
+      </div>
+
+      <div class="automation-card purple">
+        <div class="auto-trigger purple">30 Days — Lost Stage <span class="new-badge">New</span></div>
+        <div class="auto-desc">Triggers only when lost reason = "Unreachable — Never responded." Fires from original inquiry date. SMS + email sent. No response = permanently closed.</div>
+      </div>
+    </div>
+
+    <!-- Custom Fields -->
+    <div class="card">
+      <h3>Custom Fields</h3>
+      <div class="field-row">
+        <div class="field-name">Date Form Sent</div>
+        <div class="field-type">Auto — Form trigger</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Date Form Received</div>
+        <div class="field-type">Auto — On submission</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Call Attempt Count</div>
+        <div class="field-type">Manual — VA increments</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Insurance Received <span class="field-new">New</span></div>
+        <div class="field-type">Manual — Yes/No</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">B&amp;E Confirmed <span class="field-new">New</span></div>
+        <div class="field-type">Manual — Yes/No</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Patient ID</div>
+        <div class="field-type">Manual — Won close</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Loss Reason</div>
+        <div class="field-type">Required — Lost close</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Appointment Date</div>
+        <div class="field-type">Existing</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Owner</div>
+        <div class="field-type">Existing</div>
+      </div>
+      <div class="field-row">
+        <div class="field-name">Provider ID</div>
+        <div class="field-type">Existing</div>
+      </div>
+    </div>
+
+    <!-- VA Daily Views -->
+    <div class="card">
+      <h3>VA Daily Filtered Views</h3>
+      <div class="view-row">
+        <div class="view-title">Follow Up Required — Unassigned</div>
+        <div class="view-desc">VA claims ownership and begins phone outreach</div>
+      </div>
+      <div class="view-row">
+        <div class="view-title">Intake Form Submitted — Unassigned</div>
+        <div class="view-desc">VA claims ownership and initiates scheduling</div>
+      </div>
+      <div class="view-row">
+        <div class="view-title">Insurance Received = No <span class="field-new">New</span></div>
+        <div class="view-desc">VA follows up to collect insurance before placing any hold</div>
+      </div>
+      <div class="view-row">
+        <div class="view-title">B&amp;E Confirmed = No <span class="field-new">New</span></div>
+        <div class="view-desc">VA monitors WhatsApp and marks confirmed once B&E response received in Valant</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">PsychBright Health &nbsp;|&nbsp; GHL Intake Pipeline &nbsp;|&nbsp; Final — March 2026 &nbsp;|&nbsp; Confidential</div>
+
+</body>
+</html>
